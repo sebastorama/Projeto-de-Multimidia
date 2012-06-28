@@ -1,0 +1,198 @@
+Sebastiao Giacheto Ferreira Júnior - 5634611
+Willian Gustavo Pinch - 6426792
+
+** Componente do grupo que realizou entrega do trabalho:
+   - Sebastião Giacheto Ferreira Júnior
+
+
+** Bibliotecas utilizadas:
+   - Todas da biblioteca padrão C, stdio.h\stdlib.h
+
+
+** Estruturas de dados utilizadas na implementação:
+	1 -
+	typedef struct bmp_header {
+		unsigned char type[2]; 
+		unsigned char size[4]; 
+		unsigned char reserved[4]; 
+		unsigned char bitmap_offset[4];
+		unsigned char header_size[4]; 
+		unsigned char width[4]; 
+		unsigned char height[4]; 
+		unsigned char planes[2]; 
+		unsigned char bits_per_pixel[2]; 
+		unsigned char compression[4]; 
+		unsigned char bitmap_size[4];
+		unsigned char horizontal_resolution[4];
+		unsigned char vertical_resolution[4];
+		unsigned char num_colors[4]; 
+		unsigned char num_important_colors[4]; 
+	} bmp_header;
+
+	Utilizada para acomodar o header do arquivo bmp.
+	Foram utilizados tipos char para que seja totalmente
+	independente de arquitetura. Os 54bytes do header podem
+	ser lidos e atribuidos diretamente, o processo inverso
+	de escrita do header no arquivo também goza da mesma
+	conveniência. A representação é exata no nível de byte.
+
+
+	2 - 
+	typedef struct BMP_pixel {
+		unsigned char green;
+		unsigned char red;
+		unsigned char blue;
+	} BMP_pixel;
+
+	Utilizada para armazenar um pixel de 24bits. Também possui
+	uma representação exata da encontrada no arquivo bitmap.
+
+
+	3 - 
+	typedef struct BMP_pixel_matrix {
+		int width;       /* Width size */
+		int height;      /* Height size */
+		BMP_pixel ** pixels;  /* Hold the data */
+	} BMP_pixel_matrix;
+
+	Contém a matriz de pixels de um arquivo BMP. Possui campos
+	extras para marcar a largura e comprimento para guiar na
+	navegação da matriz.
+
+	4 - 
+	struct {
+		BMP_pixel data[8][8];
+	} typedef block_8x8;
+
+	Contém uma matriz de 8x8 pixels de 24bits.
+
+	5 - 
+	struct {
+		int w_block_count;       /* Width size of the matrix of blocks */
+		int h_block_count;       /* Height size of the matrix of blocks */
+		block_8x8 ** blocks;     /* The matrix of blocks :D */
+	} typedef pixel_blocks;
+
+	Contém a representação de uma matriz de pixels separada em blocos de 8x8
+	para processamento futuro. Campos auxiliares w_block_count e h_block_count
+	dizem quais são os limites horizontal e vertical da matriz de blocos.
+
+	6 - 
+	typedef struct {
+		BMP_pixel data[64];
+	} vector;
+
+	Contém a representação vetorizada/serializada de um block de 8x8. Sua  montagem
+	(do block_8x8 para um vector) é feita utilizando as regras do zigzagscan e sua
+	implementação se encontra em zigzagscan.c
+
+	7 - 
+	typedef struct {
+		unsigned char value;
+		unsigned char skip;
+	} run_length_component;
+
+	Contém um elemento (skip/value) da compressão "Run length".
+
+	8 - 
+	typedef struct {
+		run_length_component green[63];
+		run_length_component red[63];
+		run_length_component blue[63];
+
+		int size_green;
+		int size_red;
+		int size_blue;
+
+		int green_dc;
+		int red_dc;
+		int blue_dc;
+	} run_length_vector;
+
+	Contém a representação de um vector (estrutura 6 desde relatório)
+	após a codificação run length. Cada componente é tratada separadamente,
+	e tem seu tamanho também armazenado de forma separada. Os tamanhos podem
+	diferir entre as componentes vermelha e verde por exemplo, por isso a 
+	separação. Os coeficientes DC extraídos dos vectors também são armazenados
+	na estrutura de dados.
+
+
+
+** Fluxo de execução do programa principal:
+
+             |```````````````|
+             |               |
+             |  arquivo.bmp  |
+             |               |
+             |_______________|
+                     |
+                     /\
+                    /  \
+                   /    \
+                  |      | ( ======= ENCODING STAGE ======= )
+                  |      |
+       bmp_header |      | BMP_pixel_matrix
+                  |      |
+                  |      | (run function: BMP_pixel_matrix_2_pixel_blocks)
+                  |      |
+                  |      | pixel_blocks
+                  |      |
+                  |      | (run function: do_zigzagscan)
+                  |      |
+                  |      | vector
+                  |      |
+                  |      | (run function: do_dc)
+                  |      |
+                  |      | vector /* but with the DC cohefficients coded with diff */
+                  |      |
+                  |      | (run function: do_rl)
+                  |      | 
+                  |      | run_length_vector
+                  |      |
+                  |      | ( ======= DECODING STAGE ======= )
+                  |      |
+                  |      | run_length_vector
+                  |      |
+                  |      | (run function: undo_rl)
+                  |      |
+                  |      | vector /* but with the DC cohefficients coded with diff */
+                  |      |
+                  |      | (run function: undo_dc)
+                  |      |
+                  |      | vector
+                  |      |
+                  |      | (run function: undo_zigzagscan)
+                  |      |
+                  |      | pixel_blocks
+                  |      |
+                  |      | (run function: pixel_blocks_2_BMP_pixel_matrix)
+                  |      |
+                  |      | BMP_pixel_matrix
+                   \    /
+                    \  /
+                     \/
+                     |
+                     |
+             |```````````````|
+             |               |
+             |  decoded.bmp  |
+             |               |
+             |_______________|
+
+  - O arquivo principal é parseado (tendo seu header extraído assim como sua matrix de pixels).
+  A partir daí uma série de transformações é feita na sua matris de pixels (ramo da direita do 
+  diagrama). Cada uma das  estruturas resultantes estão representadas, sendo as operações de
+  transformação (literalmente as funções a serem executadas) escritas nos passos entre
+  parenteses. É feita toda a parte de codificação, e depois à partir dos resultados se
+  decodifica. O resultado é salvo no arquivo "decoded.bmp" para conferência.
+
+*** Arquivos *_spec.rb
+  - O desenvolvimento dos algoritmos difference coding e run length coding,
+  dada a sua natureza complexa e para evitar duplicação de código, foram implementados
+  (descobertos) utilizando test driven development em ruby, para depois serem traduzidos
+  para C. Os arquivos *_spec.rb contém os testes e implementação em ruby para referência.
+
+*** IMPORTANTE!
+  - A compilação deverá ser feita para arquitetura alvo de 32 bits. Se esta regra não
+  for respeitada, casting de ponteiros podem levar a falhas de segmentação. O Makefile
+  especifica a maneira correta de compilação
