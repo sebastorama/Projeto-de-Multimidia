@@ -33,10 +33,35 @@ value_blocks create_value_blocks(int w_block_count, int h_block_count) {
 	return result;
 }
 
+
+pixel_blocks value_blocks_to_pixel_blocks(value_blocks vb) {
+	pixel_blocks result = create_pixel_blocks(vb.w_block, vb.h_block);
+	int i, j, k, l;
+	for(i=0; i<result.h_block_count; i++)
+		for(j=0; j<result.w_block_count; j++)
+			for(k=0; k<8; k++)
+				for(l=0; l<8; l++) {
+
+					if((int)round(vb.blocks[i][j].data[k][l].red) < 255 ) {
+						result.blocks[i][j].data[k][l].red = (int)round(vb.blocks[i][j].data[k][l].red);
+					} else result.blocks[i][j].data[k][l].red = 255; 
+
+					if((int)round(vb.blocks[i][j].data[k][l].green) < 255 ) {
+						result.blocks[i][j].data[k][l].green = (int)round(vb.blocks[i][j].data[k][l].green);
+					} else result.blocks[i][j].data[k][l].green = 255; 
+
+					if((int)round(vb.blocks[i][j].data[k][l].blue) < 255 ) {
+						result.blocks[i][j].data[k][l].blue = (int)round(vb.blocks[i][j].data[k][l].blue);
+					} else result.blocks[i][j].data[k][l].blue = 255; 
+				}
+	return result;
+}
+
 /* Each 8×8 block of each component (R, G, B) is converted to a frequency-domain 
    representation, using a discrete cosine transform (DCT). 
  */
-void dct(pixel_blocks pb) {
+value_blocks dct(pixel_blocks pb) {
+
     int i, j, x, y, line, column;
     float ci, cj, sumR, sumG, sumB;
     ci = 1;
@@ -88,12 +113,12 @@ void dct(pixel_blocks pb) {
         }
         printf("\n");
     }
-    do_quantization(result);
+    return result;
 }
 
 /* Applies the inverse DCT (IDCT)
  */
-void idct(value_blocks vb) {
+pixel_blocks idct(value_blocks vb) {
     int i, j, x, y, line, column;
     float ci, cj, sumR, sumG, sumB;
     ci = 1;
@@ -102,12 +127,12 @@ void idct(value_blocks vb) {
     sumG = 0;
     sumB = 0;
     
-    value_blocks result = create_value_blocks(vb.w_block, vb.h_block);
+    value_blocks result_vb = create_value_blocks(vb.w_block, vb.h_block);
     
     printf("\nIDCT...\n");
     /* Runs all the 8x8 blocks */
-    for (line = 0; line < result.h_block; line++) {
-        for (column = 0; column < result.w_block; column++) {
+    for (line = 0; line < result_vb.h_block; line++) {
+        for (column = 0; column < result_vb.w_block; column++) {
             for (x = 0; x < 8; x++) {
                 for (y = 0; y < 8; y++) {
                     for (i = 0; i < 8; i++) {
@@ -127,9 +152,9 @@ void idct(value_blocks vb) {
                         ci = 1;
                     }
                     /* Stores the final value of the IDCT */
-                    result.blocks[line][column].data[x][y].red = 0.25*sumR;
-                    result.blocks[line][column].data[x][y].green = 0.25*sumG;
-                    result.blocks[line][column].data[x][y].blue = 0.25*sumB;
+                    result_vb.blocks[line][column].data[x][y].red = 0.25*sumR;
+                    result_vb.blocks[line][column].data[x][y].green = 0.25*sumG;
+                    result_vb.blocks[line][column].data[x][y].blue = 0.25*sumB;
                     sumR = 0;
                     sumG = 0;
                     sumB = 0;
@@ -141,8 +166,10 @@ void idct(value_blocks vb) {
     printf("\nIDCT results for the first block (red component)\n");
     for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++) {
-            printf("%f ", result.blocks[0][0].data[i][j].red);
+            printf("%f ", result_vb.blocks[0][0].data[i][j].red);
         }
         printf("\n");
     }
+
+    return value_blocks_to_pixel_blocks(result_vb);
 }

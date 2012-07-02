@@ -9,6 +9,7 @@
 #include "zigzagscan.h"
 #include "rle.h"
 #include "dct.h"
+#include "quantization.h"
 
 void print_usage() {
 	printf("Usage:\n   compressor <file>\n  Where file is a windows bmp file");
@@ -51,12 +52,13 @@ int main(int argc, char * argv[]) {
 
 	/* Compression stage */
     
-    dct(pb);
+	value_blocks vb = dct(pb);
+	pixel_blocks quantized_pb = do_quantization(vb);
 
 	/* Do zigzag scan on blocks */
 	printf("\nZigzagscanning ...");
 	vector * vectors = 
-		(vector *)do_zigzagscan(pb);
+		(vector *)do_zigzagscan(quantized_pb);
 
 	printf("\nDC encoding ...");
 	/* Difference coding on the DC coef */
@@ -66,8 +68,6 @@ int main(int argc, char * argv[]) {
 	printf("\nRun lenght encoding ...");
 	run_length_vector * rl_vectors =
 		(run_length_vector *) do_rl(vectors, blocks_count);
-
-
 
 	/* Decompression stage */
 
@@ -86,6 +86,9 @@ int main(int argc, char * argv[]) {
 	pixel_blocks decompressed_pb =
 		undo_zigzagscan(decompressed_vectors, w_block_count, h_block_count);
 
+	value_blocks decompressed_vb = undo_quantization(decompressed_pb);
+	decompressed_pb = idct(decompressed_vb);
+
 	/* Join the 8x8 pixel blocks to one single matrix */
 	printf("\njoining the 8x8 blocks into a single matrix");
 	BMP_pixel_matrix decompressed_pm =
@@ -99,7 +102,5 @@ int main(int argc, char * argv[]) {
 	fclose(decompressed_file);
 	printf("\n\n == The results of the compression/decompression stage are in decompressed.bmp file");
 
-	getchar();
-	
 	return 0;
 }

@@ -28,9 +28,9 @@ typedef struct bmp_header {
 /* Struct that store the 24bit pixel. The byte order is the same that you'll
    find in the bitmap file */
 typedef struct BMP_pixel {
-	unsigned char blue;
-	unsigned char green;
-	unsigned char red;
+	char blue;
+	char green;
+	char red;
 } BMP_pixel;
 
 /* Struct that store the pixel matrix of the bitmap */
