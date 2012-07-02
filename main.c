@@ -8,6 +8,7 @@
 #include "block_division.h"
 #include "zigzagscan.h"
 #include "rle.h"
+#include "dct.h"
 
 void print_usage() {
 	printf("Usage:\n   compressor <file>\n  Where file is a windows bmp file");
@@ -49,6 +50,8 @@ int main(int argc, char * argv[]) {
 	int blocks_count = w_block_count*h_block_count;
 
 	/* Compression stage */
+    
+    dct(pb);
 
 	/* Do zigzag scan on blocks */
 	printf("\nZigzagscanning ...");
