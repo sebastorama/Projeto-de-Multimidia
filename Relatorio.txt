@@ -117,6 +117,40 @@ Willian Gustavo Pinch - 6426792
 	na estrutura de dados.
 
 
+	9 -	
+	typedef struct pixel_value {
+		float blue;
+		float green;
+		float red;
+	} pixel_value;
+
+	Guarda o pixel apos a transformada discreta de cosenos ser aplicada. Possui valores
+	de ponto flutuantes que sao arredondados na conversao para int quando a
+	quantizacao é aplicada
+
+
+	10 - 
+	struct {
+		pixel_value data[8][8];
+	} typedef block;
+
+	Bloco de 8x8 pixlels que conterão a transformada discreta de cossenos
+	(estrutura 9 acima)
+
+
+	11 - 
+	struct {
+		int w_block;       /* Width size of the matrix of blocks */
+		int h_block;       /* Height size of the matrix of blocks */
+		block ** blocks;   /* The matrix of blocks :D */
+	} typedef value_blocks;
+
+	Uma matriz de blocos de 8x8 pixels após a transformada discreta de cossenos.
+	Blocos e pixels são descritos nas estruturas 9/10 anteriores
+
+
+
+
 
 ** Fluxo de execução do programa principal:
 
@@ -148,6 +182,11 @@ Willian Gustavo Pinch - 6426792
                   |      | (run function: do_rl)
                   |      | 
                   |      | run_length_vector
+                  |      |
+                  |      | ( ======= DISK OPERATIONS ======= ) 
+                  |      | --> escreve compressed_file.bin com run_length_vector 
+                  |      |
+                  |      | <-- lê compressed_file.bin e remonta run_length_vector
                   |      |
                   |      | ( ======= DECODING STAGE ======= )
                   |      |
@@ -183,8 +222,10 @@ Willian Gustavo Pinch - 6426792
   A partir daí uma série de transformações é feita na sua matris de pixels (ramo da direita do 
   diagrama). Cada uma das  estruturas resultantes estão representadas, sendo as operações de
   transformação (literalmente as funções a serem executadas) escritas nos passos entre
-  parenteses. É feita toda a parte de codificação, e depois à partir dos resultados se
-  decodifica. O resultado é salvo no arquivo "decoded.bmp" para conferência.
+  parenteses. É feita toda a parte de codificação e a saída da compressão é escrita no arquivo
+  compressed_file.bin. Posteriormente este arquivo é lido e as estruturas de dados necessárias
+  são remontadas à partir dele para iniciar a fase de descompressão. O resultado  da
+  descompressão é então salvo no arquivo "decoded.bmp" para conferência.
 
 *** Arquivos *_spec.rb
   - O desenvolvimento dos algoritmos difference coding e run length coding,
