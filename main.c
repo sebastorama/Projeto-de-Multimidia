@@ -54,11 +54,12 @@ int main(int argc, char * argv[]) {
 	/* Compression stage */
     
 	/* Apply the DCT */
-    printf("\nDCT...");
-    value_blocks vb = dct(pb);
-    
-    /* Apply the quantization */
-    printf("\nQuantization...");
+	printf("\nDCT... This may take a little while");
+	fflush(stdout);
+	value_blocks vb = dct(pb);
+
+	/* Apply the quantization */
+	printf("\nQuantization...");
 	pixel_blocks quantized_pb = do_quantization(vb);
 
 	/* Do zigzag scan on blocks */
@@ -74,34 +75,34 @@ int main(int argc, char * argv[]) {
 	printf("\nRun lenght encoding...");
 	run_length_vector * rl_vectors =
 		(run_length_vector *) do_rl(vectors, blocks_count);
-    
-    /* Writing on disk */
-    
-    printf("\n\nWriting on disk...\n\n");
-    /* Writes on the disc the compressed file */
-    compressed_file = fopen("compressed_file.bin", "w+b");
-    /* Writes the header */
-    write_header(header, compressed_file);
-    /* Writes the remaining data */
-    write_compressed_file(w_block_count, h_block_count, rl_vectors, compressed_file);
-    fclose(compressed_file);
-    
-    /* Reading from disk */
-    
-    printf("Reading from disk...");
-    int w_block_count_read, h_block_count_read;
-    /* Reads from disk the compressed file */
-    compressed_file = fopen("compressed_file.bin", "r");
-    /* Reads the header */
-    bmp_header header_read = get_header(compressed_file);
-    /* Reads the remaining data */
-    run_length_vector * rl_vectors_read = (run_length_vector *) read_compressed_file(&w_block_count_read, &h_block_count_read, compressed_file);
-    fclose(compressed_file);
-    
-    /* Decompression stage */
+
+	/* Writing on disk */
+
+	printf("\n\nWriting on disk...\n\n");
+	/* Writes on the disc the compressed file */
+	compressed_file = fopen("compressed_file.bin", "w+b");
+	/* Writes the header */
+	write_header(header, compressed_file);
+	/* Writes the remaining data */
+	write_compressed_file(w_block_count, h_block_count, rl_vectors, compressed_file);
+	fclose(compressed_file);
+
+	/* Reading from disk */
+
+	printf("Reading from disk...");
+	int w_block_count_read, h_block_count_read;
+	/* Reads from disk the compressed file */
+	compressed_file = fopen("compressed_file.bin", "r");
+	/* Reads the header */
+	bmp_header header_read = get_header(compressed_file);
+	/* Reads the remaining data */
+	run_length_vector * rl_vectors_read = (run_length_vector *) read_compressed_file(&w_block_count_read, &h_block_count_read, compressed_file);
+	fclose(compressed_file);
+
+	/* Decompression stage */
 
 	/* Decode the run length */
-    printf("\n\nNow decoding...\nDecoding run lenght...");
+	printf("\n\nNow decoding...\nDecoding run lenght...");
 	vector * decompressed_vectors = 
 		(vector *)undo_rl(rl_vectors_read, w_block_count_read*h_block_count_read);
 
@@ -115,11 +116,12 @@ int main(int argc, char * argv[]) {
 		undo_zigzagscan(decompressed_vectors, w_block_count_read, h_block_count_read);
 
 	/* Undo the quantization */
-    printf("\nUndoing the quantization...");
-    value_blocks decompressed_vb = undo_quantization(decompressed_pb);
-    
-    /* Apply the IDCT (DCT inverse) */
-    printf("\nIDCT (DCT inverse)...");
+	printf("\nUndoing the quantization...");
+	value_blocks decompressed_vb = undo_quantization(decompressed_pb);
+
+	/* Apply the IDCT (DCT inverse) */
+	printf("\nIDCT (DCT inverse)... This may take a little while");
+	fflush(stdout);
 	decompressed_pb = idct(decompressed_vb);
 
 	/* Join the 8x8 pixel blocks to one single matrix */
