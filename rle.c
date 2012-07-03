@@ -173,3 +173,76 @@ vector * undo_rl(run_length_vector * rlv, int rlv_count) {
 
 	return result;
 }
+
+/* Writes the compressed file on disk */
+void write_compressed_file(int w_block_count, int h_block_count, run_length_vector * rl_vectors, FILE *f) {
+	int i, k, block_count;
+    block_count = w_block_count * h_block_count;
+    
+    /* Writes the dimensions */
+    fwrite(&w_block_count , sizeof(int), 1, f);
+    fwrite(&h_block_count , sizeof(int), 1, f);
+    
+    /* Writes the information of all the blocks */
+    for (i = 0; i < block_count; i++) {
+        fwrite(&rl_vectors[i].size_red, sizeof(int), 1, f);
+        fwrite(&rl_vectors[i].size_green, sizeof(int), 1, f);
+        fwrite(&rl_vectors[i].size_blue, sizeof(int), 1, f);
+        fwrite(&rl_vectors[i].red_dc, sizeof(int), 1, f);
+        fwrite(&rl_vectors[i].green_dc, sizeof(int), 1, f);
+        fwrite(&rl_vectors[i].blue_dc, sizeof(int), 1, f);
+        
+        for (k = 0; k < rl_vectors[i].size_red; k++) {
+            fwrite(&rl_vectors[i].red[k].skip, sizeof(unsigned char), 1, f);
+            fwrite(&rl_vectors[i].red[k].value, sizeof(unsigned char), 1, f);
+        }
+        for (k = 0; k < rl_vectors[i].size_green; k++) {
+            fwrite(&rl_vectors[i].green[k].skip, sizeof(unsigned char), 1, f);
+            fwrite(&rl_vectors[i].green[k].value, sizeof(unsigned char), 1, f);
+        }
+        for (k = 0; k < rl_vectors[i].size_blue; k++) {
+            fwrite(&rl_vectors[i].blue[k].skip, sizeof(unsigned char), 1, f);
+            fwrite(&rl_vectors[i].blue[k].value, sizeof(unsigned char), 1, f);
+        }
+    }
+}
+
+/* Reads the compressed file from disk */
+run_length_vector* read_compressed_file(int* w_block_count, int* h_block_count, FILE *f) {
+    int i, k, w_count, h_count;
+    
+    /* Reads the dimensions */
+    fread(&w_count , sizeof(int), 1, f);
+    fread(&h_count , sizeof(int), 1, f);
+    
+    *w_block_count = w_count;
+    *h_block_count = h_count;
+    
+    run_length_vector * result = (run_length_vector *)calloc(w_count*h_count, sizeof(run_length_vector));
+    
+    /* Reads the information of all the blocks */
+    for (i = 0; i < w_count*h_count; i++) {
+        fread(&result[i].size_red, sizeof(int), 1, f);
+        fread(&result[i].size_green, sizeof(int), 1, f);
+        fread(&result[i].size_blue, sizeof(int), 1, f);
+        fread(&result[i].red_dc, sizeof(int), 1, f);
+        fread(&result[i].green_dc, sizeof(int), 1, f);
+        fread(&result[i].blue_dc, sizeof(int), 1, f);
+        
+        for (k = 0; k < result[i].size_red; k++) {
+            fread(&result[i].red[k].skip, sizeof(unsigned char), 1, f);
+            fread(&result[i].red[k].value, sizeof(unsigned char), 1, f);
+        }
+        for (k = 0; k < result[i].size_green; k++) {
+            fread(&result[i].green[k].skip, sizeof(unsigned char), 1, f);
+            fread(&result[i].green[k].value, sizeof(unsigned char), 1, f);
+        }
+        for (k = 0; k < result[i].size_blue; k++) {
+            fread(&result[i].blue[k].skip, sizeof(unsigned char), 1, f);
+            fread(&result[i].blue[k].value, sizeof(unsigned char), 1, f);
+        }
+    }
+    return result;
+}
+
+

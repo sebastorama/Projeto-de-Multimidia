@@ -30,7 +30,6 @@ pixel_blocks do_quantization(value_blocks vb) {
     
     pixel_blocks result = create_pixel_blocks(vb.w_block, vb.h_block);
     
-    printf("\nQuantization...\n");
     /* Runs all the 8x8 blocks */
     for (line = 0; line < result.h_block_count; line++) {
         for (column = 0; column < result.w_block_count; column++) {
@@ -44,13 +43,13 @@ pixel_blocks do_quantization(value_blocks vb) {
         }
     }
     /* Prints one of the results for analysis */
-    printf("\nQuantization results for the first block (red component)\n");
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-            printf("%d ", result.blocks[0][0].data[i][j].red);
-        }
-        printf("\n");
-    }
+    //printf("\nQuantization results for the first block (red component)\n");
+    //for (i = 0; i < 8; i++) {
+    //    for (j = 0; j < 8; j++) {
+    //        printf("%d ", result.blocks[0][0].data[i][j].red);
+    //    }
+    //    printf("\n");
+    //}
 
     return result;
 }
@@ -71,8 +70,6 @@ value_blocks undo_quantization(pixel_blocks pb) {
     
     value_blocks result = create_value_blocks(pb.w_block_count, pb.h_block_count);
     
-
-    printf("\nUndoing the Quantization...\n");
     /* Runs all the 8x8 blocks */
 
     for (line = 0; line < result.h_block; line++) {
@@ -87,13 +84,13 @@ value_blocks undo_quantization(pixel_blocks pb) {
         }
     }
     /* Prints one of the results for analysis */
-    printf("\nResults after undoing the quantization for the first block (red component)\n");
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-            printf("%f ", result.blocks[0][0].data[i][j].red);
-        }
-        printf("\n");
-    }
+    //printf("\nResults after undoing the quantization for the first block (red component)\n");
+    //for (i = 0; i < 8; i++) {
+    //    for (j = 0; j < 8; j++) {
+    //        printf("%f ", result.blocks[0][0].data[i][j].red);
+    //    }
+    //    printf("\n");
+    //}
     return result;
 }
 

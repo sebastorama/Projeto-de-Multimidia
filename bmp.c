@@ -104,7 +104,7 @@ print_field_human_readable(char * name, unsigned char * value, int size) {
 }
 
 void print_header(bmp_header header) { 
-	printf("=== Header info:\n\n");
+	printf("\n=== Header info: ===\n");
 	print_field_raw("type", header.type, 2); 
 	print_field_human_readable("size", header.size, 4); 
 	print_field_raw("reserved", header.reserved, 4); 

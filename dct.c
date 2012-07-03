@@ -72,7 +72,6 @@ value_blocks dct(pixel_blocks pb) {
     
     value_blocks result = create_value_blocks(pb.w_block_count, pb.h_block_count);
     
-    printf("\n\nDCT...\n");
     /* Runs all the 8x8 blocks */
     for (line = 0; line < result.h_block; line++) {
         for (column = 0; column < result.w_block; column++) {
@@ -106,13 +105,13 @@ value_blocks dct(pixel_blocks pb) {
         }
     }
     /* Prints one of the results for analysis */
-    printf("\nDCT results for the first block (red component)\n");
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-            printf("%f ", result.blocks[0][0].data[i][j].red);
-        }
-        printf("\n");
-    }
+    //printf("\nDCT results for the first block (red component)\n");
+    //for (i = 0; i < 8; i++) {
+    //    for (j = 0; j < 8; j++) {
+    //        printf("%f ", result.blocks[0][0].data[i][j].red);
+    //    }
+    //    printf("\n");
+    //}
     return result;
 }
 
@@ -129,7 +128,6 @@ pixel_blocks idct(value_blocks vb) {
     
     value_blocks result_vb = create_value_blocks(vb.w_block, vb.h_block);
     
-    printf("\nIDCT...\n");
     /* Runs all the 8x8 blocks */
     for (line = 0; line < result_vb.h_block; line++) {
         for (column = 0; column < result_vb.w_block; column++) {
@@ -163,13 +161,13 @@ pixel_blocks idct(value_blocks vb) {
         }
     }
     /* Prints one of the results for analysis */
-    printf("\nIDCT results for the first block (red component)\n");
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-            printf("%f ", result_vb.blocks[0][0].data[i][j].red);
-        }
-        printf("\n");
-    }
+    //printf("\nIDCT results for the first block (red component)\n");
+    //for (i = 0; i < 8; i++) {
+    //    for (j = 0; j < 8; j++) {
+    //        printf("%f ", result_vb.blocks[0][0].data[i][j].red);
+    //    }
+    //    printf("\n");
+    //}
 
     return value_blocks_to_pixel_blocks(result_vb);
 }

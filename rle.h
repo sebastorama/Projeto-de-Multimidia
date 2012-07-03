@@ -55,3 +55,11 @@ run_length_vector* do_rl(vector* v, int vector_count);
  */
 vector * undo_rl(run_length_vector * rlv, int rlv_count);
 
+/* Writes the compressed file on disk
+ */
+void write_compressed_file(int w_block_count, int h_block_count, run_length_vector * rl_vectors, FILE *f);
+
+/* Reads the compressed file from disk 
+ */
+run_length_vector* read_compressed_file(int* w_block_count, int* h_block_count, FILE *f);
+
